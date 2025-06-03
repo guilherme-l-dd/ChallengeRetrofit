@@ -10,7 +10,7 @@ import okhttp3.Request
 import org.junit.Test
 import org.junit.Assert.*
 
-class UnlockCallAdapterTest {
+class ChallengeCallAdapterTest {
 
     @Test
     fun testMockInterceptor() = runTest {

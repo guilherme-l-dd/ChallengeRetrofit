@@ -21,7 +21,7 @@ object NetworkClient {
             .baseUrl("https://api.example.com/")
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
-            .addCallAdapterFactory(UnlockCallAdapterFactory())
+            .addCallAdapterFactory(ChallengeCallAdapterFactory())
             .build()
         
         return retrofit.create(ApiService::class.java)
