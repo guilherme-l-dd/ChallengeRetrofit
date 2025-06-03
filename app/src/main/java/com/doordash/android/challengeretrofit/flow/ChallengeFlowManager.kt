@@ -7,24 +7,24 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.first
 
-object UnlockFlowManager {
+object ChallengeFlowManager {
     private val _navigationFlow = MutableSharedFlow<Unit>(replay = 1)
     val navigationFlow: SharedFlow<Unit> = _navigationFlow.asSharedFlow()
 
     private val _uiUpdateFlow = MutableSharedFlow<Unit>(replay = 1)
     val uiUpdateFlow: SharedFlow<Unit> = _uiUpdateFlow.asSharedFlow()
 
-    private val _unlockChannel = Channel<Unit>(Channel.UNLIMITED)
-    private val unlockFlow = _unlockChannel.receiveAsFlow()
+    private val _challengeChannel = Channel<Unit>(Channel.UNLIMITED)
+    private val challengeFlow = _challengeChannel.receiveAsFlow()
 
-    fun unlock() {
-        _unlockChannel.trySend(Unit)
+    fun completeChallenge() {
+        _challengeChannel.trySend(Unit)
         _uiUpdateFlow.tryEmit(Unit)
     }
 
-    suspend fun waitForUnlock() {
+    suspend fun waitForChallenge() {
         _uiUpdateFlow.resetReplayCache()
         _navigationFlow.tryEmit(Unit)
-        unlockFlow.first()
+        challengeFlow.first()
     }
 }

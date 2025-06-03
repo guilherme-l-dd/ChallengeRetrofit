@@ -1,6 +1,6 @@
 package com.doordash.android.challengeretrofit
 
-import com.doordash.android.challengeretrofit.flow.UnlockFlowManager
+import com.doordash.android.challengeretrofit.flow.ChallengeFlowManager
 import com.doordash.android.challengeretrofit.network.MockInterceptor
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -29,10 +29,10 @@ class UnlockCallAdapterTest {
     }
 
     @Test
-    fun testUnlockFlow() = runTest {
-        val job = launch { UnlockFlowManager.waitForUnlock() }
+    fun testChallengeFlow() = runTest {
+        val job = launch { ChallengeFlowManager.waitForChallenge() }
         delay(50)
-        UnlockFlowManager.unlock()
+        ChallengeFlowManager.completeChallenge()
         job.join()
     }
 }

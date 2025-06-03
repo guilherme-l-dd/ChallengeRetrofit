@@ -13,7 +13,7 @@ import retrofit2.Retrofit
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 
-class UnlockCallAdapterFactory : CallAdapter.Factory() {
+class ChallengeCallAdapterFactory : CallAdapter.Factory() {
 
     // Create a scope for network operations with SupervisorJob
     private val networkScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -29,10 +29,10 @@ class UnlockCallAdapterFactory : CallAdapter.Factory() {
         }
 
         val responseType = getParameterUpperBound(0, returnType as ParameterizedType)
-        return UnlockCallAdapter<Any>(responseType, networkScope)
+        return ChallengeCallAdapter<Any>(responseType, networkScope)
     }
     
-    private class UnlockCallAdapter<T>(
+    private class ChallengeCallAdapter<T>(
         private val responseType: Type,
         private val networkScope: CoroutineScope
     ) : CallAdapter<T, Call<T>> {
@@ -40,11 +40,11 @@ class UnlockCallAdapterFactory : CallAdapter.Factory() {
         override fun responseType(): Type = responseType
         
         override fun adapt(call: Call<T>): Call<T> {
-            return UnlockCall(call, networkScope)
+            return ChallengeCall(call, networkScope)
         }
     }
     
-    private class UnlockCall<T>(
+    private class ChallengeCall<T>(
         private val delegate: Call<T>,
         private val networkScope: CoroutineScope
     ) : Call<T> by delegate {
@@ -54,7 +54,7 @@ class UnlockCallAdapterFactory : CallAdapter.Factory() {
 
             if (response.code() == 423) {
                 // For execute(), we can't handle async flow properly
-                // This should ideally not be used with the unlock pattern
+                // This should ideally not be used with the challenge pattern
                 // Return the 423 response as-is
                 return response
             }
@@ -69,7 +69,7 @@ class UnlockCallAdapterFactory : CallAdapter.Factory() {
                         // Wait for challenge completion in a coroutine
                         networkScope.launch {
                             ChallengeFlowManager.waitForChallenge()
-                            // After unlock, call success
+                            // After challenge completion, call success
                             callback.onResponse(
                                 call,
                                 retrofit2.Response.success(
@@ -88,6 +88,6 @@ class UnlockCallAdapterFactory : CallAdapter.Factory() {
             })
         }
         
-        override fun clone(): Call<T> = UnlockCall(delegate.clone(), networkScope)
+        override fun clone(): Call<T> = ChallengeCall(delegate.clone(), networkScope)
     }
 }

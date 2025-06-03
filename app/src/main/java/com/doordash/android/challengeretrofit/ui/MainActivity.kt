@@ -10,7 +10,7 @@ import androidx.activity.ComponentActivity
 import androidx.lifecycle.lifecycleScope
 import com.doordash.android.challengeretrofit.R
 import com.doordash.android.challengeretrofit.data.ApiResponse
-import com.doordash.android.challengeretrofit.flow.UnlockFlowManager
+import com.doordash.android.challengeretrofit.flow.ChallengeFlowManager
 import com.doordash.android.challengeretrofit.network.NetworkClient
 import kotlinx.coroutines.launch
 import retrofit2.Call
@@ -73,15 +73,15 @@ class MainActivity : ComponentActivity() {
 
     private fun observeFlows() {
         lifecycleScope.launch {
-            UnlockFlowManager.navigationFlow.collect {
-                tvStatus.text = "Verification required - launching verification screen..."
-                startActivity(Intent(this@MainActivity, SecondActivity::class.java))
+            ChallengeFlowManager.navigationFlow.collect {
+                tvStatus.text = "Challenge required - launching challenge screen..."
+                startActivity(Intent(this@MainActivity, ChallengeActivity::class.java))
             }
         }
 
         lifecycleScope.launch {
-            UnlockFlowManager.uiUpdateFlow.collect {
-                tvStatus.text = "API call successful: Resource unlocked after verification"
+            ChallengeFlowManager.uiUpdateFlow.collect {
+                tvStatus.text = "API call successful: Resource unlocked after challenge"
                 btnCallApi.isEnabled = true
                 progressBar.visibility = View.GONE
             }

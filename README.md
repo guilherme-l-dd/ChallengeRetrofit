@@ -7,7 +7,7 @@ This Android application demonstrates a sophisticated flow control mechanism usi
 The app implements a unique pattern where:
 
 1. **API calls are intercepted** and mocked to return a 423 (Locked) response
-2. **CallAdapter.Factory handles 423 responses** by requesting verification through UnlockFlowManager
+2. **CallAdapter.Factory handles 423 responses** by requesting verification through ChallengeFlowManager
 3. **MainActivity listens for navigation events** and launches the verification screen
 4. **Flow-based communication** allows the verification screen to unlock the API call
 5. **Seamless continuation** of the original API call after verification
@@ -21,28 +21,28 @@ The app implements a unique pattern where:
 
 ### 2. UnlockCallAdapterFactory
 - Custom Retrofit CallAdapter that handles 423 responses
-- Requests verification through UnlockFlowManager when 423 is received
+- Requests verification through ChallengeFlowManager when 423 is received
 - Waits for unlock signal via Flow before continuing
 - Located in: `network/UnlockCallAdapterFactory.kt`
 
-### 3. UnlockFlowManager
+### 3. ChallengeFlowManager
 - Singleton object managing unlock mechanism, navigation, and UI state
 - Uses CompletableDeferred for reliable unlock coordination
 - Uses StateFlow for UI state management and navigation events
 - Encapsulates all flow logic away from CallAdapter and activities
-- Located in: `flow/UnlockFlowManager.kt`
+- Located in: `flow/ChallengeFlowManager.kt`
 
 ### 4. Activities
 
 #### MainActivity
 - Contains a button to trigger API calls
 - Shows loading state and API response
-- Observes UI state changes from UnlockFlowManager for reactive UI updates
-- Listens for navigation events and launches SecondActivity when needed
+- Observes UI state changes from ChallengeFlowManager for reactive UI updates
+- Listens for navigation events and launches ChallengeActivity when needed
 
-#### SecondActivity
-- Verification/unlock screen
-- Contains a button to complete verification
+#### ChallengeActivity
+- Challenge/unlock screen
+- Contains a button to complete challenge
 - Publishes unlock signal and returns to MainActivity
 
 ## How It Works
