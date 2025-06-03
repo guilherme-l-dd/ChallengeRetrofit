@@ -45,7 +45,87 @@ The app implements a unique pattern where:
 - Contains a button to complete challenge
 - Publishes challenge completion signal and returns to MainActivity
 
+## Architecture Diagram
+
+```mermaid
+graph TB
+    subgraph "UI Layer"
+        MA[MainActivity]
+        CA[ChallengeActivity]
+    end
+
+    subgraph "Network Layer"
+        NC[NetworkClient]
+        CCAF[ChallengeCallAdapterFactory]
+        MI[MockInterceptor]
+        AS[ApiService]
+    end
+
+    subgraph "Flow Management"
+        CFM[ChallengeFlowManager]
+    end
+
+    subgraph "Data"
+        AR[ApiResponse]
+    end
+
+    MA -->|"createApiService().getTestData()"| NC
+    NC -->|"Retrofit with ChallengeCallAdapterFactory"| CCAF
+    NC -->|"OkHttp with MockInterceptor"| MI
+    NC -->|"Creates"| AS
+
+    CCAF -->|"waitForChallenge()"| CFM
+    CFM -->|"navigationFlow"| MA
+    CFM -->|"uiUpdateFlow"| MA
+
+    MA -->|"startActivity(Intent)"| CA
+    CA -->|"completeChallenge()"| CFM
+    CA -->|"finish()"| MA
+
+    CCAF -->|"Returns"| AR
+    AS -->|"Defines"| AR
+
+    style CFM fill:#e1f5fe
+    style CCAF fill:#f3e5f5
+    style MI fill:#fff3e0
+```
+
 ## How It Works
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant MainActivity
+    participant NetworkClient
+    participant ChallengeCallAdapterFactory
+    participant MockInterceptor
+    participant ChallengeFlowManager
+    participant ChallengeActivity
+
+    User->>MainActivity: Click "Call API" button
+    MainActivity->>NetworkClient: createApiService().getTestData()
+    NetworkClient->>ChallengeCallAdapterFactory: Retrofit call with ChallengeCallAdapter
+    ChallengeCallAdapterFactory->>MockInterceptor: HTTP request to test-endpoint
+    MockInterceptor-->>ChallengeCallAdapterFactory: 423 Locked response
+
+    Note over ChallengeCallAdapterFactory: Detects 423 response
+    ChallengeCallAdapterFactory->>ChallengeFlowManager: waitForChallenge()
+    ChallengeFlowManager->>MainActivity: navigationFlow.emit()
+
+    MainActivity->>ChallengeActivity: startActivity(Intent)
+    ChallengeActivity->>User: Show "Complete Challenge" button
+
+    User->>ChallengeActivity: Click "Complete Challenge"
+    ChallengeActivity->>ChallengeFlowManager: completeChallenge()
+    ChallengeFlowManager->>ChallengeCallAdapterFactory: challengeFlow.emit()
+    ChallengeFlowManager->>MainActivity: uiUpdateFlow.emit()
+
+    ChallengeCallAdapterFactory->>MainActivity: onResponse(success)
+    MainActivity->>User: Show "API call successful" message
+    ChallengeActivity->>MainActivity: finish() - return to MainActivity
+```
+
+### Step-by-Step Flow:
 
 1. User clicks "Call API" button in MainActivity
 2. MockInterceptor returns 423 response
